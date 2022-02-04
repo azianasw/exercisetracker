@@ -66,28 +66,16 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
   }
 });
 
-app.get('/api/users/:_id/logs', function (req, res, next) {
+app.get('/api/users/:_id/logs', async (req, res, next) => {
   let { _id } = req.params;
 
-  const userLogs = function (done) {
-    Users.findById(_id)
-      .select('-__v')
-      .populate('exercises')
-      .exec(function (err, logs) {
-        if (err) return done(err);
-        done(null, logs);
-      });
-  }
-
-  userLogs(function (err, logs) {
-    if (err) res.json(err);
-
-    let { username, _id, exercises } = logs;
-    let userLogs = {
-      username,
-      count: exercises.length,
-      _id,
-      log: exercises.map(e => {
+  try {
+    const userLogs = await Users.findById(_id).populate('exercises').exec();
+    req.userLogs = {
+      username: userLogs.username,
+      count: userLogs.exercises.length,
+      _id: userLogs._id,
+      log: userLogs.exercises.map(e => {
         return {
           description: e.description,
           duration: e.duration,
@@ -95,9 +83,11 @@ app.get('/api/users/:_id/logs', function (req, res, next) {
         }
       })
     };
-    req.userLogs = userLogs;
+
     next();
-  });
+  } catch (err) {
+    console.log(err);
+  }
 }, function (req, res) {
   let { from, to, limit } = req.query;
   limit = parseInt(limit);
