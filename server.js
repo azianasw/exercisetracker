@@ -30,7 +30,7 @@ app.route('/api/users')
   })
   .post(async (req, res) => {
     try {
-      let { username, _id } = await Users.create({ username: req.body.username });
+      const { username, _id } = await Users.create({ username: req.body.username });
       return res.json({
         'username': username,
         '_id': _id
