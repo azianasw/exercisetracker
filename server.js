@@ -51,7 +51,7 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
     const exercise = await Exercises.create({ description, duration, date });
     let user = await Users.findById(_id);
 
-    user.exercises.push(_id);
+    user.exercises.push(exercise._id);
     await user.save();
 
     return res.json({
