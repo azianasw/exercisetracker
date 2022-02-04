@@ -5,6 +5,9 @@ require('dotenv').config()
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
+const Users = require('./models/userModel');
+const Exercises = require('./models/exerciseModel');
+
 app.use(cors())
 app.use(express.static('public'))
 app.get('/', (req, res) => {
@@ -15,19 +18,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-
-const exerciseSchema = new mongoose.Schema({
-  description: { type: String, required: true },
-  duration: { type: Number, required: true },
-  date: { type: String, default: new Date(Date.now()).toDateString() }
-});
-const Exercises = mongoose.model('exercise', exerciseSchema);
-
-const userSchema = new mongoose.Schema({
-  username: String,
-  exercises: [{ type: mongoose.Schema.Types.ObjectId, ref: 'exercise' }]
-});
-const Users = mongoose.model('user', userSchema);
 
 app.route('/api/users')
   .get(function (req, res) {
