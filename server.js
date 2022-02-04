@@ -48,18 +48,18 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
   else date = undefined;
 
   try {
-    const { _id, description, duration, date } = await Exercises.create({ description, duration, date });
-    let foundUser = await Users.findById(_id);
+    const exercise = await Exercises.create({ description, duration, date });
+    let user = await Users.findById(_id);
 
-    foundUser.exercises.push(_id);
-    await foundUser.save();
+    user.exercises.push(_id);
+    await user.save();
 
     return res.json({
-      username: foundUser.username,
-      description: description,
-      duration: duration,
-      date: date,
-      _id: foundUser._id
+      username: user.username,
+      description: exercise.description,
+      duration: exercise.duration,
+      date: exercise.date,
+      _id: user._id
     });
   } catch (err) {
     console.log(err);
