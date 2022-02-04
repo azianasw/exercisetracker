@@ -135,7 +135,6 @@ app.get('/api/users/:_id/logs', function (req, res, next) {
         }
       })
     };
-    console.log(`userLogs: ${JSON.stringify(userLogs)}`);
     req.userLogs = userLogs;
     next();
   });
