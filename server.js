@@ -20,43 +20,24 @@ app.use(bodyParser.urlencoded({ extended: false }));
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
 app.route('/api/users')
-  .get(function (req, res) {
-    const allUsers = function (done) {
-      Users.find()
-        .select('username _id')
-        .exec(function (err, users) {
-          if (err) done(err);
-          done(null, users);
-        });
+  .get(async (req, res) => {
+    try {
+      const users = await Users.find().select('username _id').exec();
+      return res.json(users);
+    } catch (err) {
+      console.log(err);
     }
-
-    allUsers(function (err, users) {
-      if (err) console.log(err);
-      else res.json(users);
-    });
   })
-  .post(function (req, res) {
-    let newUser = new Users({
-      username: req.body.username
-    });
-
-    const createUser = function (done) {
-      newUser.save(function (err, doc) {
-        if (err) return done(err);
-        done(null, doc);
+  .post(async (req, res) => {
+    try {
+      const { username, _id } = await Users.create({ username: req.body.username });
+      return res.json({
+        'username': username,
+        '_id': _id
       });
+    } catch (err) {
+      console.log(err);
     }
-
-    createUser(function (err, newUser) {
-      if (err) console.log(err);
-      else {
-        const { username, _id } = newUser;
-        res.json({
-          'username': username,
-          '_id': _id
-        });
-      }
-    });
   });
 
 app.post('/api/users/:_id/exercises', function (req, res) {
