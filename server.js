@@ -40,51 +40,30 @@ app.route('/api/users')
     }
   });
 
-app.post('/api/users/:_id/exercises', function (req, res) {
+app.post('/api/users/:_id/exercises', async (req, res) => {
   let { description, duration, date } = req.body;
   let { _id } = req.params;
 
   if (date) date = new Date(date).toDateString();
   else date = undefined;
 
-  const createExercise = function (done) {
-    let exercise = new Exercises({
-      description,
-      duration,
-      date
-    });
+  try {
+    const { _id, description, duration, date } = await Exercises.create({ description, duration, date });
+    let foundUser = await Users.findById(_id);
 
-    exercise.save(function (err, doc) {
-      if (err) return done(err);
-      done(null, doc);
+    foundUser.exercises.push(_id);
+    await foundUser.save();
+
+    return res.json({
+      username: foundUser.username,
+      description: description,
+      duration: duration,
+      date: date,
+      _id: foundUser._id
     });
+  } catch (err) {
+    console.log(err);
   }
-
-  const foundUser = function (done) {
-    Users.findById(_id)
-      .exec(function (err, user) {
-        if (err) return done(err);
-        done(null, user)
-      });
-  }
-
-  createExercise(function (err, newExercise) {
-    if (err) res.json(err);
-    foundUser(function (err, user) {
-      if (err) res.json(err);
-      user.exercises.push(newExercise._id);
-      user.save(function (err, updatedUser) {
-        if (err) res.json(err);
-        res.json({
-          username: updatedUser.username,
-          description: newExercise.description,
-          duration: newExercise.duration,
-          date: newExercise.date,
-          _id: updatedUser._id
-        });
-      })
-    });
-  });
 });
 
 app.get('/api/users/:_id/logs', function (req, res, next) {
